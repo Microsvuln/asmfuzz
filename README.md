@@ -2,8 +2,8 @@
 <p align="center">Web fuzzing 100% in assembly</p>
 
 <p align="center">
- <a href="#taskslist">Tasks List</a> •
- <a href="#compile">Compile</a> •
+ <a href="#tasks-list">Tasks List</a> •
+ <a href="#cloning--compile">Compile</a> •
  <a href="https://github.com/blackbinn/asmfuzz/blob/master/LICENSE">License</a> •
  <a href="https://github.com/arisusec">Author</a>
 </p>
