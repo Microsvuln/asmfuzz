@@ -12,9 +12,9 @@
 <h2 align="center">Tasks List</h2>
 
 - [x] Arguments
-- [ ] Banner
+- [x] Banner
 - [ ] Informations
-- [ ] Loading Wordlist
+- [x] Loading Wordlist
 - [ ] Requests (HTTP)
 - [ ] Requests (HTTPS)
 - [ ] Flags
