@@ -1,73 +1,138 @@
 section .bss
-  buf: resw 50
-  url: resb 70
-  wordlist: resb 70
-  fd_in: resb 1
-
+        wordlist: resw 50
+        url: resb 70
+        wl_file: resb 70
+        fd_in: resb 1
+        char: resb 1
+        wd: resb 50
 section .rodata
-  err0: db "missing arguments!", 0xa
+        err0: db "Error: missing arguments!", 0xa
+        err1: db "Error: wordlist not found!", 0xa
+        banner:
+db "    ___   _____ __  _________", 0xA
+db "   /   | / ___//  |/  / ____/_  __________", 0xA
+db "  / /| | \__ \/ /|_/ / /_  / / / /_  /_  /", 0xA
+db " / ___ |___/ / /  / / __/ / /_/ / / /_/ /_", 0xA
+db "/_/  |_/____/_/  /_/_/    \__,_/ /___/___/", 0xA, 0xA
+db "https://Github.com/blackbinn/asmfuzz", 0xA
+db "Version: 1.0.0a", 0xA
+db "__________________________________________________", 0xA, 0xA
+        banlen: equ $-banner
 
 section .text
 global _start
 _start:
 
-  mov edx, dword [esp + 8]
-  mov [url], edx
+;       push ebp
+;       mov ebp, esp
 
-  mov ebx, dword [esp + 12]
-  mov [wordlist], ebx
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, banner
+        mov edx, banlen
 
-  push 20
-  push err0
+        int 80h
 
-  cmp ebx, 0
-  je error
+        mov edx, dword [esp + 8]
+        mov [url], edx
 
-  cmp edx, 0
-  je error
+        mov ebx, dword [esp + 12]
+        mov [wl_file], ebx
 
-  pop eax
-  pop eax
+        push 26
+        push err0
 
-  mov eax, 5
-  mov ebx, dword [wordlist]
-  mov ecx, 0
+        cmp ebx, 0
+        je error
 
-  int 80h
+        cmp edx, 0
+        je error
 
-  mov [fd_in], eax
-  mov eax, 3
-  mov ebx, [fd_in]
-  mov ecx, buf
-  mov edx, 100
+        pop eax
+        pop eax
 
-  int 80h
+        mov eax, 5
+        mov ebx, dword [wl_file]
+        mov ecx, 0
 
-  push 0
-  jmp exit
+        int 80h
 
+        push 27
+        push err1
+        cmp eax, 0xfffffffe
+        je error
 
-write:
-  mov eax, 4
-  mov ebx, 1
-  pop ecx
-  pop edx
+        pop ecx
+        pop ecx
 
-  int 80h
+        mov [fd_in], eax
+        mov eax, 3
+        mov ebx, [fd_in]
+        mov ecx, wordlist
+        mov edx, 100
+
+        int 80h
+
+        mov edx, 0
+        call findlf
+
+        push 0
+
+        jmp exit
+
+; aqui começa as parada loka
+
+findlf:
+
+        lea esi, [wordlist+edx]
+        lodsb
+
+        cmp al, `\n`
+        je 0x080490b1
+
+        mov [wd+edx], al
+
+        cmp al, 0
+        je 0x0804908b
+
+        mov [char], al
+
+        inc edx
+
+        cmp al, `\n`
+        jne 0x08049086
+
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, wd
+        mov edi, edx
+        mov edx, 100
+
+        int 80h
+
+        mov edx, edi
+
+        xor eax, eax
+
+        mov [wd], eax
+
+        jmp 0x0804908f
+
+        ret
 
 error:
-  mov eax, 4
-  mov ebx, 2
-  pop ecx
-  pop edx
+        mov eax, 4
+        mov ebx, 2
+        pop ecx
+        pop edx
 
-  int 80h
+        int 80h
 
-  push 1
-  jmp exit
+        push 1
+        jmp exit
 
 exit:
-  mov eax, 1
-  pop ebx
+        mov eax, 1
+        pop ebx
 
-  int 80h
+        int 80h
