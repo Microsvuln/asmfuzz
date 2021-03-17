@@ -73,6 +73,7 @@ _start:
         int 80h
 
         mov edx, 0
+        mov ebx, 0
         call findlf
 
         push 0
@@ -86,12 +87,15 @@ findlf:
         lea esi, [wordlist+edx]
         lodsb
 
+        push eax
+
         cmp al, `\n`
         je request
 
-        mov [wd+edx], al
+        mov [wd+ebx], al
 
         inc edx
+        inc ebx
 
         push 0
         cmp al, 0
@@ -104,7 +108,6 @@ findlf:
         ret
 
 request:
-
         inc edx
 
         mov eax, 4
@@ -114,6 +117,8 @@ request:
         int 80h
 
         xor eax, eax
+
+        mov ebx, eax
 
         mov [wd], eax
 
