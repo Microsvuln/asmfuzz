@@ -3,7 +3,6 @@ section .bss
         url: resb 70
         wl_file: resb 70
         fd_in: resb 1
-        char: resb 1
         wd: resb 50
 section .rodata
         err0: db "Error: missing arguments!", 0xa
@@ -88,37 +87,37 @@ findlf:
         lodsb
 
         cmp al, `\n`
-        je 0x080490b1
+        je request
 
         mov [wd+edx], al
 
-        cmp al, 0
-        je 0x0804908b
-
-        mov [char], al
-
         inc edx
 
+        push 0
+        cmp al, 0
+        je exit
+        pop eax
+
         cmp al, `\n`
-        jne 0x08049086
+        jne findlf
+
+        ret
+
+request:
+
+        inc edx
 
         mov eax, 4
         mov ebx, 1
         mov ecx, wd
-        mov edi, edx
-        mov edx, 100
 
         int 80h
-
-        mov edx, edi
 
         xor eax, eax
 
         mov [wd], eax
 
-        jmp 0x0804908f
-
-        ret
+        jmp findlf
 
 error:
         mov eax, 4
